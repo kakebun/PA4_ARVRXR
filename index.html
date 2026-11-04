@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PA4 – A-Frame – 241280 Mykhtybayev</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- A-Frame 1.8.0, then my components BEFORE <a-scene> -->
+  <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+  <script src="components.js"></script>
+</head>
+<body>
+  <!-- Variant 241280: Space station | pulse | gaze (fuse 1.5 s) | corridor -->
+  <a-scene fog="type: linear; color: #060914; near: 10; far: 45"
+           renderer="antialias: true"
+           stats>
+
+    <!-- ========== ASSETS: 3+ preloaded textures ========== -->
+    <a-assets timeout="10000">
+      <img id="deck"       src="textures/deck.jpg">
+      <img id="deckNormal" src="textures/deck_normal.png">
+      <img id="panel"      src="textures/panel.jpg">
+      <img id="stars"      src="textures/stars.jpg">
+    </a-assets>
+
+    <!-- ========== ENVIRONMENT ========== -->
+    <a-sky radius="300" material="shader: flat; side: back; src: #stars; fog: false"></a-sky>
+
+    <!-- Distant planet seen from the observation deck -->
+    <a-sphere position="60 18 -120" radius="28" segments-width="48" segments-height="32"
+              material="color: #d9824a; roughness: 1; fog: false"></a-sphere>
+    <a-torus position="60 18 -120" rotation="75 0 15" radius="42" radius-tubular="1.2"
+             segments-tubular="96" material="color: #e8c39a; opacity: 0.55; transparent: true; fog: false"></a-torus>
+
+    <!-- Ground with MY texture component, repeat 12 x 12 + normal map -->
+    <a-entity id="ground"
+              geometry="primitive: plane; width: 30; height: 30"
+              rotation="-90 0 0" position="0 0 -6"
+              x1280-texture="src: #deck; repeat: 12 12; normalSrc: #deckNormal; anisotropy: 8"></a-entity>
+
+    <!-- Corridor walls with MY texture component -->
+    <a-entity id="wallLeft"
+              geometry="primitive: box; width: 0.2; height: 3.5; depth: 18"
+              position="-4.5 1.75 -6"
+              x1280-texture="src: #panel; repeat: 6 1"></a-entity>
+    <a-entity id="wallRight"
+              geometry="primitive: box; width: 0.2; height: 3.5; depth: 18"
+              position="4.5 1.75 -6"
+              x1280-texture="src: #panel; repeat: 6 1"></a-entity>
+
+    <!-- Glowing floor guide strips -->
+    <a-box position="-3 0.01 -6" width="0.08" height="0.02" depth="18" material="shader: flat; color: #3fd0ff"></a-box>
+    <a-box position="3 0.01 -6"  width="0.08" height="0.02" depth="18" material="shader: flat; color: #3fd0ff"></a-box>
+
+    <!-- Lights: ambient + directional + point -->
+    <a-entity light="type: ambient; color: #9fb4e0; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 1.4" position="-3 8 4"></a-entity>
+    <a-entity light="type: point; color: #3fd0ff; intensity: 6; distance: 14; decay: 1.5" position="0 3.2 -7"></a-entity>
+
+    <!-- ========== CAMERA RIG ========== -->
+    <a-entity id="rig" position="0 0 2" wasd-controls="acceleration: 20">
+      <a-entity id="camera" camera look-controls position="0 1.6 0">
+        <!-- GAZE variant: fuse cursor 1.5 s with a visible ring, only .exhibit objects -->
+        <a-entity id="cursor"
+                  cursor="fuse: true; fuseTimeout: 1500"
+                  raycaster="objects: .exhibit; far: 25"
+                  position="0 0 -1"
+                  geometry="primitive: ring; radiusInner: 0.014; radiusOuter: 0.022"
+                  material="shader: flat; color: #7fdbff; opacity: 0.9; transparent: true"
+                  animation__fusing="property: scale; startEvents: fusing; easing: linear; dur: 1500; from: 1 1 1; to: 0.35 0.35 0.35"
+                  animation__leave="property: scale; startEvents: mouseleave; dur: 150; to: 1 1 1"
+                  animation__click="property: scale; startEvents: click; dur: 150; from: 1.6 1.6 1.6; to: 1 1 1"></a-entity>
+      </a-entity>
+
+      <!-- INFO PANEL: ID, variant and "Selected: <name> (<n> of <total>)" -->
+      <a-entity id="x1280-board" position="0 2.55 -2.6" rotation="-12 0 0"
+                geometry="primitive: plane; width: 2.6; height: 0.62"
+                material="shader: flat; color: #0b1630; opacity: 0.8; transparent: true">
+        <a-entity id="x1280-id" position="0 0.13 0.01"
+                  text="value: ID 241280 - Sultan Mykhtybayev - prefix x1280-\nVariant: Space station | pulse | gaze (fuse 1.5 s) | corridor; align: center; width: 2.5; color: #9fe6ff; wrapCount: 58"></a-entity>
+        <a-entity id="x1280-status" position="0 -0.15 0.01"
+                  text="value: Selected: none (0 of 6); align: center; width: 2.5; color: #ffffff; wrapCount: 58"></a-entity>
+      </a-entity>
+    </a-entity>
+
+    <!-- ========== EXHIBITS: corridor, 2 rows of 3, rows 3 m apart, along 10 m ========== -->
+    <a-cylinder position="-1.5 0.5 -2"  radius="0.35" height="1" material="color: #5b6577; metalness: 0.6; roughness: 0.4"></a-cylinder>
+    <a-cylinder position="1.5 0.5 -2"   radius="0.35" height="1" material="color: #5b6577; metalness: 0.6; roughness: 0.4"></a-cylinder>
+    <a-cylinder position="-1.5 0.5 -7"  radius="0.35" height="1" material="color: #5b6577; metalness: 0.6; roughness: 0.4"></a-cylinder>
+    <a-cylinder position="1.5 0.5 -7"   radius="0.35" height="1" material="color: #5b6577; metalness: 0.6; roughness: 0.4"></a-cylinder>
+    <a-cylinder position="-1.5 0.5 -12" radius="0.35" height="1" material="color: #5b6577; metalness: 0.6; roughness: 0.4"></a-cylinder>
+    <a-cylinder position="1.5 0.5 -12"  radius="0.35" height="1" material="color: #5b6577; metalness: 0.6; roughness: 0.4"></a-cylinder>
+
+    <a-sphere id="ex1" class="exhibit" name="Planet Hologram"
+              position="-1.5 1.5 -2" radius="0.35"
+              material="color: #3aa8ff; emissive: #0a3a66; opacity: 0.9; transparent: true"
+              x1280-motion="phase: 0.00; period: 3.0; log: true"
+              x1280-exhibit="name: Planet Hologram; info: 3D model of Earth used to plan orbits."></a-sphere>
+
+    <a-entity id="ex2" class="exhibit" name="Fuel Cell"
+              position="1.5 1.5 -2"
+              geometry="primitive: cylinder; radius: 0.2; height: 0.6"
+              material="color: #ffb347; metalness: 0.6; roughness: 0.35"
+              x1280-motion="phase: 1.05; period: 3.2"
+              x1280-exhibit="name: Fuel Cell; info: Hydrogen cell that powers the station modules."></a-entity>
+
+    <a-torus id="ex3" class="exhibit" name="Docking Ring"
+             position="-1.5 1.5 -7" radius="0.3" radius-tubular="0.06"
+             material="color: #c0c8d8; metalness: 0.8; roughness: 0.25"
+             x1280-motion="phase: 2.09; period: 2.8"
+             x1280-exhibit="name: Docking Ring; info: Scale model of the port where cargo ships dock."></a-torus>
+
+    <a-entity id="ex4" class="exhibit" name="Moon Rock Sample"
+              position="1.5 1.5 -7"
+              geometry="primitive: dodecahedron; radius: 0.3"
+              material="color: #8a8278; roughness: 1; metalness: 0"
+              x1280-motion="phase: 3.14; period: 3.4"
+              x1280-exhibit="name: Moon Rock Sample; info: Basalt brought back from the lunar surface."></a-entity>
+
+    <a-octahedron id="ex5" class="exhibit" name="Navigation Beacon"
+                  position="-1.5 1.5 -12" radius="0.3"
+                  material="color: #ff4f6d; metalness: 0.3; roughness: 0.4"
+                  x1280-motion="phase: 4.19; period: 3.0"
+                  x1280-exhibit="name: Navigation Beacon; info: Radio beacon that guides ships to the station."></a-octahedron>
+
+    <a-entity id="ex6" class="exhibit" name="Energy Crystal"
+              position="1.5 1.5 -12"
+              geometry="primitive: icosahedron; radius: 0.3"
+              material="color: #9dff7a; emissive: #1f5a10; metalness: 0.2; roughness: 0.3"
+              x1280-motion="phase: 5.24; period: 2.6"
+              x1280-exhibit="name: Energy Crystal; info: Experimental crystal battery grown in zero-g."></a-entity>
+
+  </a-scene>
+</body>
+</html>
